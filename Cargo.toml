@@ -1,12 +1,12 @@
 [package]
 name = "pandora"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Daniel Rivas <ers.daniel+dev@gmail.com>"]
 
 description = "Unofficial Rust library for interacting with the Pandora API"
 
 homepage = "https://github.com/danielrs/pandora-rs"
-documentation = "https://github.com/danielrs/pandora-rs"
+documentation = "https://docs.rs/pandora"
 repository = "https://github.com/danielrs/pandora-rs"
 
 license = "MIT"
