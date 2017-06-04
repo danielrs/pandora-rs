@@ -21,79 +21,77 @@ impl<'a> Stations<'a> {
 
     /// Lists the user stations.
     pub fn list(&self) -> Result<Vec<Station>> {
-        let stations = try!(self.pandora.post::<StationList>(
-            Method::UserGetStationList,
-            None
-        ));
+        let stations = try!(self.pandora
+                                .post::<StationList>(Method::UserGetStationList, None));
         Ok(stations.stations)
     }
 
     /// Creates a new station.
-    pub fn create<T>(&self, music_token: &T) -> Result<Station> where T: ToMusicToken {
-        self.pandora.post(
-            Method::StationCreateStation,
-            Some(serde_json::to_value(CreateStationRequest {
-                track_token: None,
-                music_type: None,
-                music_token: Some(music_token.to_music_token()),
-            }))
-        )
+    pub fn create<T>(&self, music_token: &T) -> Result<Station>
+        where T: ToMusicToken
+    {
+        self.pandora
+            .post(Method::StationCreateStation,
+                  Some(serde_json::to_value(CreateStationRequest {
+                                                track_token: None,
+                                                music_type: None,
+                                                music_token: Some(music_token.to_music_token()),
+                                            })))
     }
 
     /// Renames a station.
     pub fn rename<T>(&self, station: &T, station_name: &str) -> Result<Station>
-    where T: ToStationToken {
-        self.pandora.post(
-            Method::StationRenameStation,
-            Some(serde_json::to_value(RenameStationRequest {
-                station_token: station.to_station_token(),
-                station_name: station_name.to_owned(),
-            }))
-        )
+        where T: ToStationToken
+    {
+        self.pandora
+            .post(Method::StationRenameStation,
+                  Some(serde_json::to_value(RenameStationRequest {
+                                                station_token: station.to_station_token(),
+                                                station_name: station_name.to_owned(),
+                                            })))
     }
 
     /// Deletes a station.
-    pub fn delete<T>(&self, station: &T) -> Result<()> where T: ToStationToken {
-        self.pandora.post_noop(
-            Method::StationDeleteStation,
-            Some(serde_json::to_value(DeleteStationRequest {
-                station_token: station.to_station_token(),
-            }))
-        )
+    pub fn delete<T>(&self, station: &T) -> Result<()>
+        where T: ToStationToken
+    {
+        self.pandora
+            .post_noop(Method::StationDeleteStation,
+                       Some(serde_json::to_value(DeleteStationRequest {
+                                                     station_token: station.to_station_token(),
+                                                 })))
     }
 
     /// Adds a seed to a station.
     pub fn add_seed<S, T>(&self, station: &S, music_token: &T) -> Result<Seed>
-    where S: ToStationToken, T: ToMusicToken {
-        self.pandora.post(
-            Method::StationAddMusic,
-            Some(serde_json::to_value(AddSeedRequest {
-                station_token: station.to_station_token(),
-                music_token: music_token.to_music_token(),
-            }))
-        )
+        where S: ToStationToken,
+              T: ToMusicToken
+    {
+        self.pandora
+            .post(Method::StationAddMusic,
+                  Some(serde_json::to_value(AddSeedRequest {
+                                                station_token: station.to_station_token(),
+                                                music_token: music_token.to_music_token(),
+                                            })))
     }
 
     /// Removes a seed from a station.
     pub fn remove_seed(&self, seed: &Seed) -> Result<()> {
-        self.pandora.post(
-            Method::StationDeleteMusic,
-            Some(serde_json::to_value(RemoveSeedRequest {
-                seed_id: seed.seed_id.clone(),
-            }))
-        )
+        self.pandora
+            .post(Method::StationDeleteMusic,
+                  Some(serde_json::to_value(RemoveSeedRequest { seed_id: seed.seed_id.clone() })))
     }
 
     /// Gets extended station information.
     pub fn station<T>(&self, station: &T) -> Result<Station>
-    where T: ToStationToken {
-        self.pandora.post(
-            Method::StationGetStation,
-            Some(serde_json::to_value(GetStationRequest {
-                station_token: station.to_station_token(),
-                include_extended_attributes: true,
-            }))
-        )
+        where T: ToStationToken
+    {
+        self.pandora
+            .post(Method::StationGetStation,
+                  Some(serde_json::to_value(GetStationRequest {
+                                                station_token: station.to_station_token(),
+                                                include_extended_attributes: true,
+                                            })))
     }
 
     /// Gets the current checksum of the station; useful if you need
@@ -103,7 +101,9 @@ impl<'a> Stations<'a> {
     }
 
     /// Returns a Playlist handler for the given station.
-    pub fn playlist<T>(&self, station: &T) -> Playlist where T: ToStationToken {
+    pub fn playlist<T>(&self, station: &T) -> Playlist
+        where T: ToStationToken
+    {
         Playlist::new(self.pandora, station)
     }
 }

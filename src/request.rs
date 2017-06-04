@@ -16,15 +16,21 @@ use hyper::method::Method as HttpMethod;
 use serde::Deserialize;
 use serde::ser::Error as SerdeError;
 use serde_json;
-use serde_json::value::{Value};
+use serde_json::value::Value;
 use serde_json::error::Error as JsonError;
 
 use url::Url;
 
 
-pub fn request<T>(
-    client: &Client, http_method: &HttpMethod, endpoint: Endpoint, method: Method, body: Option<Value>,
-    credentials: Option<&Credentials>) -> Result<T> where T: Deserialize {
+pub fn request<T>(client: &Client,
+                  http_method: &HttpMethod,
+                  endpoint: Endpoint,
+                  method: Method,
+                  body: Option<Value>,
+                  credentials: Option<&Credentials>)
+                  -> Result<T>
+    where T: Deserialize
+{
 
     let mut body = try!(serde_json::to_string(&authenticate_body(body, credentials)));
     if method.is_encrypted() {
@@ -42,27 +48,40 @@ pub fn request<T>(
     };
     try!(res.read_to_string(&mut body));
 
-    debug!("== Received response ==\nStatus: {:?}\nHeaders: {:?}\nBody: {:?}", res.status, res.headers, body);
+    debug!("== Received response ==\nStatus: {:?}\nHeaders: {:?}\nBody: {:?}",
+           res.status,
+           res.headers,
+           body);
 
     let res: Response<T> = try!(serde_json::from_str(&body));
     match res {
-        Response { stat: Stat::Ok, result: Some(result), .. } => {
-            Ok(result)
-        },
-        Response { stat: Stat::Ok, result: None, .. } => {
-            Err(Error::Codec(JsonError::custom("Nothing to deserialize")))
-        },
+        Response {
+            stat: Stat::Ok,
+            result: Some(result),
+            ..
+        } => Ok(result),
+        Response {
+            stat: Stat::Ok,
+            result: None,
+            ..
+        } => Err(Error::Codec(JsonError::custom("Nothing to deserialize"))),
         Response { stat: Stat::Fail, .. } => {
-            Err(Error::Api { message: res.message.unwrap(), code: res.code.unwrap().into() })
-        },
+            Err(Error::Api {
+                    message: res.message.unwrap(),
+                    code: res.code.unwrap().into(),
+                })
+        }
     }
 }
 
 /// Returns a RequestBuilder with the HTTP method and URL set. The URL query string
 /// will include the auth information if credentials were provided.
-fn authenticate<'a>(
-    client: &'a Client, http_method: &HttpMethod, endpoint: Endpoint, method: Method,
-    credentials: Option<&Credentials>) -> RequestBuilder<'a> {
+fn authenticate<'a>(client: &'a Client,
+                    http_method: &HttpMethod,
+                    endpoint: Endpoint,
+                    method: Method,
+                    credentials: Option<&Credentials>)
+                    -> RequestBuilder<'a> {
 
     let url = format!("{}?method={}", endpoint.to_string(), method.to_string());
     let mut url = Url::parse(&url).unwrap();
@@ -104,13 +123,15 @@ fn authenticate_body(body: Option<Value>, credentials: Option<&Credentials>) -> 
     if let Some(credentials) = credentials {
         if let Some(obj) = body.as_object_mut() {
             if let Some(partner_auth_token) = credentials.partner_auth_token() {
-                obj.insert("partnerAuthToken".to_owned(), Value::String(partner_auth_token.to_owned()));
+                obj.insert("partnerAuthToken".to_owned(),
+                           Value::String(partner_auth_token.to_owned()));
             }
             if let Some(sync_time) = credentials.sync_time() {
                 obj.insert("syncTime".to_owned(), Value::U64(sync_time.clone()));
             }
             if let Some(user_auth_token) = credentials.user_auth_token() {
-                obj.insert("userAuthToken".to_owned(), Value::String(user_auth_token.to_owned()));
+                obj.insert("userAuthToken".to_owned(),
+                           Value::String(user_auth_token.to_owned()));
             }
         }
     }

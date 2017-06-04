@@ -2,8 +2,8 @@
 //! the required [Credentials](struct.Credentials.html) needed to
 //! start using [Pandora](../struct.Pandora.html).
 
-use super::{DEFAULT_ENDPOINT};
-use crypt::{decrypt};
+use super::DEFAULT_ENDPOINT;
+use crypt::decrypt;
 use error::Result;
 use method::Method;
 use request::request;
@@ -65,27 +65,22 @@ impl Credentials {
             user_auth_token: None,
         };
 
-        let partner_login : PartnerLogin = try!(request(
-            &client,
-            &HttpMethod::Post,
-            DEFAULT_ENDPOINT,
-            Method::AuthPartnerLogin,
-            Some(serde_json::to_value(&partner)),
-            None,
-        ));
+        let partner_login: PartnerLogin = try!(request(&client,
+                                                       &HttpMethod::Post,
+                                                       DEFAULT_ENDPOINT,
+                                                       Method::AuthPartnerLogin,
+                                                       Some(serde_json::to_value(&partner)),
+                                                       None));
         credentials.set_partner_login(partner_login);
 
-        let user_login_body = serde_json::to_value(
-            &UserLoginRequest::new(username.to_owned(), password.to_owned())
-        );
-        let user_login : UserLogin = try!(request(
-            &client,
-            &HttpMethod::Post,
-            DEFAULT_ENDPOINT,
-            Method::AuthUserLogin,
-            Some(user_login_body),
-            Some(&credentials),
-        ));
+        let user_login_body = serde_json::to_value(&UserLoginRequest::new(username.to_owned(),
+                                                                          password.to_owned()));
+        let user_login: UserLogin = try!(request(&client,
+                                                 &HttpMethod::Post,
+                                                 DEFAULT_ENDPOINT,
+                                                 Method::AuthUserLogin,
+                                                 Some(user_login_body),
+                                                 Some(&credentials)));
         credentials.set_user_login(user_login);
 
         // At this point we can assume credentials are correct.
@@ -98,10 +93,8 @@ impl Credentials {
             Ok(new_credentials) => {
                 *self = new_credentials;
                 Ok(())
-            },
-            Err(e) => {
-                Err(e)
-            },
+            }
+            Err(e) => Err(e),
         }
     }
 
@@ -129,7 +122,7 @@ impl Credentials {
     pub fn partner_id<'a>(&'a self) -> Option<&'a str> {
         match self.partner_id {
             Some(ref partner_id) => Some(partner_id.as_str()),
-            None => None
+            None => None,
         }
     }
 
@@ -137,7 +130,7 @@ impl Credentials {
     pub fn partner_auth_token<'a>(&'a self) -> Option<&'a str> {
         match self.partner_auth_token {
             Some(ref partner_auth_token) => Some(partner_auth_token.as_str()),
-            None => None
+            None => None,
         }
     }
 
@@ -145,7 +138,7 @@ impl Credentials {
     pub fn sync_time<'a>(&'a self) -> Option<&'a u64> {
         match self.sync_time {
             Some(ref sync_time) => Some(&sync_time),
-            None => None
+            None => None,
         }
     }
 
@@ -153,7 +146,7 @@ impl Credentials {
     pub fn user_id<'a>(&'a self) -> Option<&'a str> {
         match self.user_id {
             Some(ref user_id) => Some(user_id.as_str()),
-            None => None
+            None => None,
         }
     }
 
@@ -161,7 +154,7 @@ impl Credentials {
     pub fn user_auth_token<'a>(&'a self) -> Option<&'a str> {
         match self.user_auth_token {
             Some(ref user_auth_token) => Some(user_auth_token.as_str()),
-            None => None
+            None => None,
         }
     }
 
@@ -172,7 +165,12 @@ impl Credentials {
         use std::os::unix::ffi::OsStrExt;
 
         let sync_time_bytes: Vec<u8> = decrypt(self.decrypt_key(), &partner_login.sync_time)
-            .as_os_str().as_bytes().iter().skip(4).cloned().collect();
+            .as_os_str()
+            .as_bytes()
+            .iter()
+            .skip(4)
+            .cloned()
+            .collect();
         let sync_time_str = str::from_utf8(&sync_time_bytes).unwrap_or("0");
         let sync_time = sync_time_str.parse::<u64>().unwrap_or(0);
 
@@ -217,8 +215,13 @@ impl Default for Partner {
 }
 
 impl Partner {
-    pub fn new(username: String, password: String, device_model: String, version: String,
-               encrypt_password: String, decrypt_password: String) -> Self {
+    pub fn new(username: String,
+               password: String,
+               device_model: String,
+               version: String,
+               encrypt_password: String,
+               decrypt_password: String)
+               -> Self {
         Partner {
             username: username,
             password: password,

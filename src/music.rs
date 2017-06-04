@@ -114,12 +114,11 @@ impl<'a> Music<'a> {
 
     /// Searches for music using the given search string.
     pub fn search(&self, search_text: &str) -> Result<SearchResults> {
-        self.pandora.post(
-            Method::MusicSearch,
-            Some(serde_json::to_value(Search {
-                search_text: search_text.to_owned(),
-                include_near_matches: true,
-            }))
-        )
+        self.pandora
+            .post(Method::MusicSearch,
+                  Some(serde_json::to_value(Search {
+                                                search_text: search_text.to_owned(),
+                                                include_near_matches: true,
+                                            })))
     }
 }

@@ -24,7 +24,7 @@ impl<T> Response<T> {
             stat: Stat::Ok,
             result: Some(result),
             message: None,
-            code: None
+            code: None,
         }
     }
 

@@ -17,8 +17,12 @@ pub struct Playlist<'a> {
 impl<'a> Playlist<'a> {
     /// Creates a new Playlist handler.
     pub fn new<T>(pandora: &'a Pandora, station: &T) -> Playlist<'a>
-    where T: ToStationToken {
-        Playlist { pandora: pandora, station_token: station.to_station_token() }
+        where T: ToStationToken
+    {
+        Playlist {
+            pandora: pandora,
+            station_token: station.to_station_token(),
+        }
     }
 
     /// Gets the current tracklist from Pandora.
@@ -35,15 +39,17 @@ impl<'a> Playlist<'a> {
     // TODO: Result should not be empty
     /// Rates a track.
     pub fn rate<T>(&self, track: T, is_positive: bool) -> Result<()>
-    where T: ToTrackToken {
-        self.pandora.post_noop(
-            Method::StationAddFeedback,
-            Some(serde_json::to_value(RateTrackRequest {
-                station_token: self.station_token.clone(),
-                track_token: track.to_track_token().unwrap_or("".to_owned()),
-                is_positive: is_positive,
-            }))
-        )
+        where T: ToTrackToken
+    {
+        self.pandora
+            .post_noop(Method::StationAddFeedback,
+                       Some(serde_json::to_value(RateTrackRequest {
+                                                     station_token: self.station_token.clone(),
+                                                     track_token: track
+                                                         .to_track_token()
+                                                         .unwrap_or("".to_owned()),
+                                                     is_positive: is_positive,
+                                                 })))
     }
 }
 
@@ -90,7 +96,7 @@ impl ToTrackToken for Track {
     fn to_track_token(&self) -> Option<String> {
         match self.track_token {
             Some(ref track_token) => Some(track_token.clone()),
-            None => None
+            None => None,
         }
     }
 }
@@ -99,7 +105,7 @@ impl<'a> ToTrackToken for &'a Track {
     fn to_track_token(&self) -> Option<String> {
         match self.track_token {
             Some(ref track_token) => Some(track_token.clone()),
-            None => None
+            None => None,
         }
     }
 }

@@ -13,9 +13,9 @@ const PADDING_BYTE: u8 = 2;
 /// which is a UTF-8 string, so it's fine to return it using
 /// the `String` type.
 pub fn encrypt(key: &str, input: &str) -> String {
-    let cipherbytes = cipher_with(key.as_bytes(), input.as_bytes(), |blowfish, from, mut to| {
-        blowfish.encrypt_block(from, to);
-    });
+    let cipherbytes = cipher_with(key.as_bytes(),
+                                  input.as_bytes(),
+                                  |blowfish, from, mut to| { blowfish.encrypt_block(from, to); });
 
     // Generate hexadecimal representation of `cipherbytes`.
     let mut output = String::with_capacity(cipherbytes.len() * 2);
@@ -59,7 +59,8 @@ pub fn decrypt(key: &str, hex_input: &str) -> OsString {
 
 /// Divides the input in blocks and ciphers it using the given closure.
 fn cipher_with<F>(key: &[u8], input: &[u8], func: F) -> Vec<u8>
-    where F: Fn(&Blowfish, &[u8], &mut [u8]) {
+    where F: Fn(&Blowfish, &[u8], &mut [u8])
+{
 
     let blowfish = Blowfish::new(key);
     let block_size = <Blowfish as BlockEncryptor>::block_size(&blowfish);
@@ -69,8 +70,10 @@ fn cipher_with<F>(key: &[u8], input: &[u8], func: F) -> Vec<u8>
     let mut input = input.to_vec();
     input.resize(input_len, PADDING_BYTE);
 
-    let mut output : Vec<u8> = Vec::with_capacity(input_len);
-    unsafe { output.set_len(input_len); }
+    let mut output: Vec<u8> = Vec::with_capacity(input_len);
+    unsafe {
+        output.set_len(input_len);
+    }
 
     // Encrypts input and into output
     for (ichunk, mut ochunk) in input.chunks(block_size).zip(output.chunks_mut(block_size)) {
@@ -86,8 +89,7 @@ fn round_len(len: usize, block_size: usize) -> usize {
     let remainder = len % block_size;
     if remainder == 0 {
         len
-    }
-    else {
+    } else {
         len + block_size - remainder
     }
 }
@@ -104,13 +106,11 @@ mod tests {
     }
 
     fn get_test_vector() -> Vec<Test> {
-        vec![
-            Test {
-                key: "R=U!LH$O2B#".to_owned(),
-                plain_text: "è.<Ú1477631903".to_owned(),
-                cipher_text: "4a6b45612b018614c92c50dc73462bbd".to_owned(),
-            },
-        ]
+        vec![Test {
+                 key: "R=U!LH$O2B#".to_owned(),
+                 plain_text: "è.<Ú1477631903".to_owned(),
+                 cipher_text: "4a6b45612b018614c92c50dc73462bbd".to_owned(),
+             }]
     }
 
     #[test]

@@ -19,7 +19,7 @@ fn main() {
                     }
                 }
             }
-        },
+        }
         Err(e) => println!("Err: {:?}", e),
     }
 }
